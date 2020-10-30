@@ -1,0 +1,2 @@
+ALTER TABLE tasks ADD COLUMN assignee BIGINT REFERENCES users(id);
+ALTER TABLE tasks RENAME COLUMN user_id TO author;
