@@ -45,7 +45,7 @@ class TaskService(private val taskRepository: TaskRepository, private val userRe
         return task.id
     }
 
-    fun updateTask(id: Long, request: SaveTaskRequest) {
+    fun updateTask(id: Long, request: SaveTaskRequest): Task {
         val currentTask: Task = taskRepository.findById(id).orElseThrow { TaskNotFoundException("Task with id $id does not exist")}
 
         if (request.authorId != null) {
@@ -67,6 +67,8 @@ class TaskService(private val taskRepository: TaskRepository, private val userRe
         }
 
         taskRepository.save(currentTask)
+
+        return currentTask
     }
 
     fun deleteTask(id: Long) {
