@@ -1,76 +1,33 @@
 package com.sauletest.testapi.controller
 
 import com.sauletest.testapi.model.entity.Task
-import com.sauletest.testapi.repository.TaskRepository
-import com.sauletest.testapi.repository.UserRepository
+import com.sauletest.testapi.service.TaskService
+import io.swagger.annotations.Api
+import io.swagger.annotations.ApiOperation
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
+@Api(description = "Task controller")
 @RequestMapping("/v1/tasks")
-class TaskController(val taskRepository: TaskRepository, val userRepository: UserRepository) {
-
+class TaskController(val taskService: TaskService) {
     @GetMapping
-    fun getTasks() = taskRepository.findAll()
+    @ApiOperation("Get all tasks")
+    fun getTasks(): List<Task> = taskService.getTasks()
 
     @RequestMapping(path = [("/{id}")], method = [(RequestMethod.GET)])
-    fun getTask(@PathVariable("id") id: Long): Optional<Task>? {
-        if (!taskRepository.existsById(id)) {
-            throw TaskNotFoundException("Task with id $id does not exist")
-        }
-
-        return taskRepository.findById(id)
-    }
+    @ApiOperation("Get task by id")
+    fun getTask(@PathVariable("id") id: Long): Optional<Task>? = taskService.getTask(id)
 
     @PostMapping
-    fun newTask(@RequestBody task: Task): Long? {
-        if (task.name.isNullOrBlank()) {
-            throw InvalidRequestException("name is missing")
-        }
-
-        if (!userRepository.existsById(task.author.id)) {
-            throw UserNotFoundException("User with id ${task.author.id} does not exist")
-        }
-
-        if (!userRepository.existsById(task.assignee.id)) {
-            throw UserNotFoundException("User with id ${task.assignee.id} does not exist")
-        }
-
-
-        taskRepository.save(task)
-        return task.id
-    }
+    @ApiOperation("Add new task")
+    fun addTask(@RequestBody task: Task): Long? = taskService.addTask(task)
 
     @RequestMapping(path = [("/{id}")], method = [(RequestMethod.PUT)])
-    fun updateTask(@PathVariable("id") id: Long, @RequestBody task: Task) {
-        val currentTask: Task = taskRepository.findById(id).orElseThrow { TaskNotFoundException("Task with id $id does not exist")}
-
-        if (task.name.isNullOrBlank()) {
-            throw InvalidRequestException("name is missing")
-        }
-
-        if (!userRepository.existsById(task.author.id)) {
-            throw UserNotFoundException("User with id ${task.author.id} does not exist")
-        }
-
-        if (!userRepository.existsById(task.assignee.id)) {
-            throw UserNotFoundException("User with id ${task.assignee.id} does not exist")
-        }
-
-        currentTask.name = task.name
-        currentTask.description = task.description
-        currentTask.author = task.author
-        currentTask.assignee = task.assignee
-
-        taskRepository.save(currentTask)
-    }
+    @ApiOperation("Update existing task")
+    fun updateTask(@PathVariable("id") id: Long, @RequestBody task: Task) = taskService.updateTask(id, task)
 
     @RequestMapping(path = [("/{id}")], method = [(RequestMethod.DELETE)])
-    fun deleteTask(@PathVariable("id") id: Long) {
-        if (!taskRepository.existsById(id)) {
-            throw TaskNotFoundException("Task with id $id does not exist")
-        }
-
-        taskRepository.deleteById(id)
-    }
+    @ApiOperation("Delete existing task")
+    fun deleteTask(@PathVariable("id") id: Long) = taskService.deleteTask(id)
 }
