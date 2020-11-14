@@ -4,8 +4,10 @@ import com.sauletest.testapi.controller.InvalidRequestException
 import com.sauletest.testapi.controller.TaskNotFoundException
 import com.sauletest.testapi.controller.UserNotFoundException
 import com.sauletest.testapi.model.entity.Task
+import com.sauletest.testapi.model.entity.User
 import com.sauletest.testapi.repository.TaskRepository
 import com.sauletest.testapi.repository.UserRepository
+import com.sauletest.testapi.request.SaveTaskRequest
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -22,45 +24,47 @@ class TaskService(private val taskRepository: TaskRepository, private val userRe
         return taskRepository.findById(id)
     }
 
-    fun addTask(task: Task): Long? {
+    fun addTask(request: SaveTaskRequest): Long? {
         when {
-            task.name.isNullOrBlank() -> throw InvalidRequestException("name is missing")
-            task.author?.id == null -> throw InvalidRequestException("author is missing")
-            task.assignee?.id == null -> throw InvalidRequestException("assignee is missing")
+            request.name.isNullOrBlank() -> throw InvalidRequestException("name is missing")
+            request.authorId == null -> throw InvalidRequestException("author is missing")
+            request.assigneeId == null -> throw InvalidRequestException("assignee is missing")
         }
 
-        if (!userRepository.existsById(task.author!!.id)) {
-            throw UserNotFoundException("User with id ${task.author?.id} does not exist")
-        }
-
-        if (!userRepository.existsById(task.assignee!!.id)) {
-            throw UserNotFoundException("User with id ${task.assignee?.id} does not exist")
-        }
+        val author: User = userRepository.findById(request.authorId!!).orElseThrow { UserNotFoundException("User with id ${request.authorId} does not exist")}
+        val assignee: User = userRepository.findById(request.assigneeId!!).orElseThrow { UserNotFoundException("User with id ${request.assigneeId} does not exist")}
 
 
-        taskRepository.save(task)
+        val task = taskRepository.save(
+                Task(description = request.description ?: "Default description of the task",
+                assignee = author,
+                author = assignee,
+                name = request.name
+                )
+        )
         return task.id
     }
 
-    fun updateTask(id: Long, task: Task) {
+    fun updateTask(id: Long, request: SaveTaskRequest) {
         val currentTask: Task = taskRepository.findById(id).orElseThrow { TaskNotFoundException("Task with id $id does not exist")}
 
-        if (task.name.isNullOrBlank()) {
-            throw InvalidRequestException("name is missing")
+        if (request.authorId != null) {
+            val author: User = userRepository.findById(request.authorId).orElseThrow { UserNotFoundException("User with id ${request.authorId} does not exist")}
+            currentTask.author = author
         }
 
-        if (!userRepository.existsById(task.author!!.id)) {
-            throw UserNotFoundException("User with id ${task.author!!.id} does not exist")
+        if (request.assigneeId != null) {
+            val assignee: User = userRepository.findById(request.assigneeId).orElseThrow { UserNotFoundException("User with id ${request.assigneeId} does not exist")}
+            currentTask.assignee = assignee
         }
 
-        if (!userRepository.existsById(task.assignee!!.id)) {
-            throw UserNotFoundException("User with id ${task.assignee!!.id} does not exist")
+        if (request.description != null) {
+            currentTask.description = request.description
         }
 
-        currentTask.name = task.name
-        currentTask.description = task.description
-        currentTask.author = task.author
-        currentTask.assignee = task.assignee
+        if (request.name != null) {
+            currentTask.name = request.name
+        }
 
         taskRepository.save(currentTask)
     }

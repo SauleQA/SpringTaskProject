@@ -27,6 +27,7 @@ dependencies {
 	implementation("org.flywaydb:flyway-core")
 	implementation("javax.validation:validation-api")
 	implementation("io.springfox:springfox-boot-starter:3.0.0")
+	implementation("com.zaxxer:HikariCP:2.3.2")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {
 		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
