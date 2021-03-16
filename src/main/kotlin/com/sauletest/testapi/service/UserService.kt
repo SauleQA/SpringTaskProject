@@ -1,6 +1,6 @@
 package com.sauletest.testapi.service
 
-import com.sauletest.testapi.controller.TaskNotFoundException
+import com.sauletest.testapi.controller.UserNotFoundException
 import com.sauletest.testapi.model.entity.User
 import com.sauletest.testapi.repository.UserRepository
 import org.springframework.stereotype.Service
@@ -12,7 +12,7 @@ class UserService(private val userRepository: UserRepository) {
 
     fun getUser(id: Long): Optional<User> {
         if (!userRepository.existsById(id)) {
-            throw TaskNotFoundException("User with id $id does not exist")
+            throw UserNotFoundException("User with id $id does not exist")
         }
 
         return userRepository.findById(id)

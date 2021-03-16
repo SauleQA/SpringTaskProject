@@ -2,17 +2,34 @@ package com.sauletest.testapi.service
 
 import com.sauletest.testapi.controller.InvalidRequestException
 import com.sauletest.testapi.controller.TaskNotFoundException
+import com.sauletest.testapi.controller.UserIsBlockedException
 import com.sauletest.testapi.controller.UserNotFoundException
 import com.sauletest.testapi.model.entity.Task
 import com.sauletest.testapi.model.entity.User
 import com.sauletest.testapi.repository.TaskRepository
 import com.sauletest.testapi.repository.UserRepository
 import com.sauletest.testapi.request.SaveTaskRequest
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.client.WebClient
 import java.util.*
+
 
 @Service
 class TaskService(private val taskRepository: TaskRepository, private val userRepository: UserRepository) {
+
+    @Bean
+    fun getWebClientBuilder(): WebClient.Builder? {
+        return WebClient.builder()
+    }
+
+    @Value("\${userblock.host}")
+    private val userBlockHost: String? = null
+
+    @Autowired
+    private val webClientBuilder: WebClient.Builder? = null
 
     fun getTasks() = taskRepository.findAll()
 
@@ -29,6 +46,21 @@ class TaskService(private val taskRepository: TaskRepository, private val userRe
             request.name.isNullOrBlank() -> throw InvalidRequestException("name is missing")
             request.authorId == null -> throw InvalidRequestException("author is missing")
             request.assigneeId == null -> throw InvalidRequestException("assignee is missing")
+        }
+
+        val isBlocked: String? = try {
+            webClientBuilder!!.build()
+                    .get()
+                    .uri("$userBlockHost/${request.authorId}")
+                    .retrieve()
+                    .bodyToMono(String::class.java)
+                    .block()
+        } catch (e: Exception) {
+            "false"
+        }
+
+        if (isBlocked != null && isBlocked == "true") {
+            throw UserIsBlockedException("Choose another author to create task")
         }
 
         val author: User = userRepository.findById(request.authorId!!).orElseThrow { UserNotFoundException("User with id ${request.authorId} does not exist")}

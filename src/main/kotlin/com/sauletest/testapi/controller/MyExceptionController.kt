@@ -25,6 +25,15 @@ class MyExceptionController {
         return ResponseEntity(errorDetails, HttpStatus.NOT_FOUND)
     }
 
+    @ExceptionHandler(value = [(UserIsBlockedException::class)])
+    fun handleUserIsBlocked(ex: UserIsBlockedException): ResponseEntity<ErrorsDetails> {
+        val errorDetails = ErrorsDetails(
+                "User is not blocked",
+                ex.message!!
+        )
+        return ResponseEntity(errorDetails, HttpStatus.BAD_REQUEST)
+    }
+
     @ExceptionHandler(value = [(InvalidRequestException::class)])
     fun handleInvalidRequest(ex: InvalidRequestException): ResponseEntity<ErrorsDetails?>? {
         val errorDetails = ErrorsDetails(
@@ -38,5 +47,7 @@ class MyExceptionController {
 class TaskNotFoundException(override val message: String?) : Exception(message)
 class InvalidRequestException(override val message: String?) : Exception(message)
 class UserNotFoundException(override val message: String?) : Exception(message)
+class UserIsBlockedException(override val message: String?) : Exception(message)
+
 
 data class ErrorsDetails(val message: String, val details: String)
