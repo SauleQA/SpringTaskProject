@@ -26,6 +26,7 @@ GET /v1/users/{id}
 ```
 
 ## Integrations
+userblock.host=http://localhost:8040 [UserBlockApi](https://github.com/SauleQA/SpringUserBlockApi)
 
 ## Run with gradle
 ```./gradlew bootRun```<br/>
