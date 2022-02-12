@@ -12,17 +12,17 @@ A simple REST API example using Kotlin.<br/>
 
 **Tasks:**
 ```
-GET /v1/tasks 
-GET /v1/tasks/{id}
-POST /v1/tasks
-PUT /v1/tasks/{id}
-DELETE /v1/tasks/{id}
+GET /v1/tasks get all tasks
+GET /v1/tasks/{id} get task by id
+POST /v1/tasks create task
+PUT /v1/tasks/{id} update task by id
+DELETE /v1/tasks/{id} delete task by id
 ```
 
 **Users:**
 ```
-GET /v1/users 
-GET /v1/users/{id}
+GET /v1/users get all users
+GET /v1/users/{id} get user by id
 ```
 
 ## Integrations
