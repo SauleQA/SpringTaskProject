@@ -30,6 +30,8 @@ userblock.host=http://localhost:8040 [UserBlockApi](https://github.com/SauleQA/S
 UserBlockApi must be running on the port 8040
 
 ## DB
+Run Postgres using docker-compose.yml
+or
 Create database "testtask" with username=postgres and password=postgres
 
 ## Run with gradle
