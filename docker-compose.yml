@@ -1,0 +1,17 @@
+version: '3.5'
+
+services:
+  postgres:
+    container_name: postgres-testapi
+    image: postgres:12.2
+    environment:
+      POSTGRES_DB: "testtask"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      PGDATA: /data/postgres
+    volumes:
+      - ./volumes/postgres/data:/data/postgres
+      - ./volumes/postgres/logs:/logs
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
